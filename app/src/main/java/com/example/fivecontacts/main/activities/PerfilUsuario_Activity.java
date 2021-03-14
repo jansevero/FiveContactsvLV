@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.text.InputType;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -29,6 +30,7 @@ public class PerfilUsuario_Activity extends AppCompatActivity implements BottomN
     Switch swLogado;
 
     Button btModificar;
+    Button btSair;
     BottomNavigationView bnv;
 
     User user;
@@ -38,6 +40,7 @@ public class PerfilUsuario_Activity extends AppCompatActivity implements BottomN
         setContentView(R.layout.activity_perfil_usuario);
 
         btModificar=findViewById(R.id.btCriar);
+        btSair=findViewById(R.id.btSair);
         bnv=findViewById(R.id.bnv);
         bnv.setOnNavigationItemSelectedListener(this);
         bnv.setSelectedItemId(R.id.anvPerfil);
@@ -75,6 +78,20 @@ public class PerfilUsuario_Activity extends AppCompatActivity implements BottomN
                 user.setEmail(edEmail.getText().toString());
                 user.setManterLogado(swLogado.isChecked());
                 salvarModificacoes(user);
+                Toast.makeText(PerfilUsuario_Activity.this,"Modificações Salvas",Toast.LENGTH_LONG).show() ;
+                finish();
+            }
+        });
+
+        btSair.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                user.setManterLogado(false);
+                salvarModificacoes(user);
+                Log.v("piririm", "alguem ligou pra mim kkkk");
+                Intent intent = new Intent(view.getContext(), ChecagemLogin_Activity.class);
+                intent.putExtra("usuario", user);
+                view.getContext().startActivity(intent);
             }
         });
     }
@@ -116,9 +133,5 @@ public class PerfilUsuario_Activity extends AppCompatActivity implements BottomN
         //Falta Salvar o E-mail
 
         escritor.commit(); //Salva em Disco
-
-        Toast.makeText(PerfilUsuario_Activity.this,"Modificações Salvas",Toast.LENGTH_LONG).show() ;
-
-        finish();
     }
 }

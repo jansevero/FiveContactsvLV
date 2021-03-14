@@ -3,8 +3,6 @@ package com.example.fivecontacts.main.activities;
 import androidx.annotation.NonNull;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
@@ -13,20 +11,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.Layout;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.fivecontacts.R;
@@ -36,9 +29,7 @@ import com.example.fivecontacts.main.utils.UIEducacionalPermissao;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.ObjectInputStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -133,22 +124,21 @@ public class ListaDeContatos_Activity extends AppCompatActivity implements UIEdu
 
             for(int i =0; i < contatos.size(); i++) {
                 Map<String,Object> listItemMap = new HashMap<String,Object>();
-                listItemMap.put("imageId", R.drawable.ic_action_ligar_list);
                 listItemMap.put("contato", contatosNomes[i]);
                 listItemMap.put("abrevs",contatosAbrevs[i]);
+                listItemMap.put("callBtID", R.drawable.ic_action_ligar_list);
+                listItemMap.put("dialBtID", R.drawable.ic_action_discar_foreground);
                 itemDataList.add(listItemMap);
             }
             SimpleAdapter simpleAdapter = new SimpleAdapter(this,itemDataList,R.layout.list_view_layout_imagem,
-                    new String[]{"imageId","contato","abrevs"},new int[]{R.id.userImage, R.id.userTitle,R.id.userAbrev});
+                    new String[]{"contato","abrevs","callBtID","dialBtID"},new int[]{R.id.userTitle,R.id.userAbrev,R.id.btdelete,R.id.btDiscar});
 
             lv.setAdapter(simpleAdapter);
-
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
                 @Override
                 public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-
 
                     if (checarPermissaoPhone_SMD(contatos.get(i).getNumero())) {
 
@@ -183,7 +173,6 @@ public class ListaDeContatos_Activity extends AppCompatActivity implements UIEdu
             adaptador = new ArrayAdapter<String>(this, R.layout.list_view_layout, nomesSP);
 
             lv.setAdapter(adaptador);
-
 
             lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
@@ -251,20 +240,21 @@ public class ListaDeContatos_Activity extends AppCompatActivity implements UIEdu
         switch (requestCode) {
             case 2222:
                if(grantResults[0]==PackageManager.PERMISSION_GRANTED){
-                   Toast.makeText(this, "VALEU", Toast.LENGTH_LONG).show();
+                   Toast.makeText(this, "PERMISSÃO CONCEDIDA", Toast.LENGTH_LONG).show();
                    Uri uri = Uri.parse(numeroCall);
-                   //   Intent itLigar = new Intent(Intent.ACTION_DIAL, uri);
                    Intent itLigar = new Intent(Intent.ACTION_CALL, uri);
                    startActivity(itLigar);
 
-               }else{
-                   Toast.makeText(this, "SEU FELA!", Toast.LENGTH_LONG).show();
+               }else{ //abre o dial quando não tem permissão
+                   String mensagem = "Sem permissão, a aplicação não consegue fazer ligações diretas. Em vez disso, o discador foi aberto. Para conceder permissão vá nas configurações do aparelho ou reinstale o aplicativo";
+                   String titulo = "Permissão de acesso a chamadas";
+                   UIEducacionalPermissao mensagemPermissao = new UIEducacionalPermissao(mensagem,titulo, 1);
+                   mensagemPermissao.onAttach ((Context)this);
+                   mensagemPermissao.show(getSupportFragmentManager(), "segundavez2");
 
-                   String mensagem= "Seu aplicativo pode ligar diretamente, mas sem permissão não funciona. Se você marcou não perguntar mais, você deve ir na tela de configurações para mudar a instalação ou reinstalar o aplicativo  ";
-                   String titulo= "Porque precisamos telefonar?";
-                   UIEducacionalPermissao mensagemPermisso = new UIEducacionalPermissao(mensagem,titulo,2);
-                   mensagemPermisso.onAttach((Context)this);
-                   mensagemPermisso.show(getSupportFragmentManager(), "segundavez");
+                   Uri uri = Uri.parse(numeroCall);
+                   Intent itLigar = new Intent(Intent.ACTION_DIAL, uri);
+                   startActivity(itLigar);
                }
                 break;
         }
